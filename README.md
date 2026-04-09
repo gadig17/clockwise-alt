@@ -25,7 +25,7 @@ Personal calendar automation via Google Apps Script. Replaces two features from 
 The interactive setup wizard handles dependencies, project creation, configuration, and authorization:
 
 ```bash
-git clone <repo-url> clockwise-alt
+git clone https://github.com/gadig17/clockwise-alt.git clockwise-alt
 cd clockwise-alt
 npm install
 npm run setup
@@ -40,7 +40,7 @@ The wizard walks you through every step interactively (~10 minutes). If you have
 ### 1. Clone and install
 
 ```bash
-git clone <repo-url> clockwise-alt
+git clone https://github.com/gadig17/clockwise-alt.git clockwise-alt
 cd clockwise-alt
 npm install
 ```
