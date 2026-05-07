@@ -12,20 +12,8 @@ interface SimpleEvent {
   eventType?: string;
 }
 
-// ── Personal calendar (read via OAuth2) ──────────────────────────────
-
-interface GCalEvent {
-  id: string;
-  summary?: string;
-  start?: { dateTime?: string; date?: string };
-  end?: { dateTime?: string; date?: string };
-  status?: string;
-}
-
-interface GCalEventList {
-  items?: GCalEvent[];
-  nextPageToken?: string;
-}
+// ── Personal calendar (read via Calendar Advanced Service) ───────────
+// Requires the personal calendar to be shared with the work account.
 
 function fetchPersonalEvents(
   calendarId: string,
@@ -37,39 +25,37 @@ function fetchPersonalEvents(
   let pageToken: string | undefined;
 
   do {
-    const params: Record<string, string> = {
-      timeMin: timeMin.toISOString(),
-      timeMax: timeMax.toISOString(),
-      singleEvents: "true",
-      orderBy: "startTime",
-      maxResults: "250",
-      timeZone: tz,
-    };
-    if (pageToken) params.pageToken = pageToken;
+    const opts: GoogleAppsScript.Calendar.Schema.Events = Calendar.Events!.list(
+      calendarId,
+      {
+        timeMin: timeMin.toISOString(),
+        timeMax: timeMax.toISOString(),
+        singleEvents: true,
+        orderBy: "startTime",
+        maxResults: 250,
+        timeZone: tz,
+        pageToken: pageToken,
+      }
+    );
 
-    const data = fetchPersonalCalendarApi(
-      `/calendars/${encodeURIComponent(calendarId)}/events`,
-      params
-    ) as GCalEventList;
-
-    for (const item of data.items || []) {
+    for (const item of opts.items || []) {
       if (item.status === "cancelled") continue;
       const isAllDay = !item.start?.dateTime;
       events.push({
-        id: item.id,
+        id: item.id!,
         summary: item.summary || "(no title)",
         start: new Date(item.start?.dateTime || item.start?.date || ""),
         end: new Date(item.end?.dateTime || item.end?.date || ""),
         isAllDay,
       });
     }
-    pageToken = (data as GCalEventList).nextPageToken;
+    pageToken = opts.nextPageToken;
   } while (pageToken);
 
   return events;
 }
 
-// ── Work calendar (read/write via CalendarApp + Advanced Calendar API) ──
+// ── Work calendar (read/write via Calendar Advanced Service) ─────────
 
 function getWorkCalendar(config: ClockwiseConfig): GoogleAppsScript.Calendar.Calendar {
   if (config.workCalendarId === "primary") {

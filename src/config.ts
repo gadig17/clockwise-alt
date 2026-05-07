@@ -1,6 +1,4 @@
 interface ClockwiseConfig {
-  oauthClientId: string;
-  oauthClientSecret: string;
   personalCalendarId: string;
   workCalendarId: string;
   timezone: string;
@@ -36,8 +34,6 @@ const DEFAULTS_NUMERIC: Partial<Record<keyof ClockwiseConfig, number>> = {
 };
 
 const REQUIRED_KEYS = [
-  "OAUTH_CLIENT_ID",
-  "OAUTH_CLIENT_SECRET",
   "PERSONAL_CALENDAR_ID",
 ] as const;
 
@@ -122,8 +118,6 @@ function getConfig(): ClockwiseConfig {
   }
 
   return {
-    oauthClientId: getProp("OAUTH_CLIENT_ID"),
-    oauthClientSecret: getProp("OAUTH_CLIENT_SECRET"),
     personalCalendarId: getProp("PERSONAL_CALENDAR_ID"),
     workCalendarId: getProp("WORK_CALENDAR_ID", DEFAULTS.workCalendarId),
     timezone: getProp("TIMEZONE", DEFAULTS.timezone),

@@ -175,7 +175,7 @@ function applySetupPayload(): void {
 }
 
 /**
- * Full status check: config, auth, and a test read of both calendars.
+ * Full status check: config and a test read of both calendars.
  */
 function healthCheck(): void {
   Logger.log("=== Health Check ===");
@@ -190,18 +190,7 @@ function healthCheck(): void {
     return;
   }
 
-  // 2. OAuth
-  if (isPersonalCalendarAuthorized()) {
-    Logger.log("Personal calendar OAuth: OK");
-  } else {
-    Logger.log(
-      "Personal calendar OAuth: NOT AUTHORIZED\n" +
-        "Run authorize() and open the logged URL."
-    );
-    return;
-  }
-
-  // 3. Read personal calendar
+  // 2. Read personal calendar (via calendar sharing + Advanced Service)
   try {
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -213,10 +202,15 @@ function healthCheck(): void {
     );
     Logger.log("Personal calendar: OK (%s events in next 24h)", events.length);
   } catch (e) {
-    Logger.log("Personal calendar: FAILED — %s", e);
+    Logger.log(
+      "Personal calendar: FAILED — %s\n" +
+        "Make sure you shared your personal calendar with your work account " +
+        "(Settings > Share with specific people > 'See all event details').",
+      e
+    );
   }
 
-  // 4. Read work calendar
+  // 3. Read work calendar
   try {
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -231,7 +225,7 @@ function healthCheck(): void {
     Logger.log("Work calendar: FAILED — %s", e);
   }
 
-  // 5. Triggers
+  // 4. Triggers
   const triggers = ScriptApp.getProjectTriggers();
   Logger.log("Active triggers: %s", triggers.length);
   for (const t of triggers) {
