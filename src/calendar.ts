@@ -8,6 +8,8 @@ interface SimpleEvent {
   start: Date;
   end: Date;
   isAllDay: boolean;
+  /** "transparent" = Free, "opaque" = Busy (default when absent). */
+  transparency?: string;
   sourceId?: string;
   eventType?: string;
 }
@@ -47,6 +49,7 @@ function fetchPersonalEvents(
         start: new Date(item.start?.dateTime || item.start?.date || ""),
         end: new Date(item.end?.dateTime || item.end?.date || ""),
         isAllDay,
+        transparency: item.transparency || "opaque",
       });
     }
     pageToken = opts.nextPageToken;
@@ -111,6 +114,7 @@ function fetchWorkEvents(
         start: new Date(item.start?.dateTime || item.start?.date || ""),
         end: new Date(item.end?.dateTime || item.end?.date || ""),
         isAllDay,
+        transparency: item.transparency || "opaque",
         sourceId,
         eventType,
       });
@@ -128,14 +132,15 @@ function createWorkEvent(
   end: Date,
   extendedProps: Record<string, string>,
   tz: string,
-  colorId?: string
+  colorId?: string,
+  transparency: string = "opaque"
 ): string {
   const event: GoogleAppsScript.Calendar.Schema.Event = {
     summary,
     start: { dateTime: start.toISOString(), timeZone: tz },
     end: { dateTime: end.toISOString(), timeZone: tz },
     visibility: "private",
-    transparency: "opaque",
+    transparency,
     description: "Managed by clockwise-alt. Do not edit.",
     extendedProperties: { private: extendedProps },
   };
@@ -143,7 +148,7 @@ function createWorkEvent(
     event.colorId = colorId;
   }
   const created = Calendar.Events!.insert(event, calendarId);
-  Logger.log("Created event: %s (%s)", summary, created.id);
+  Logger.log("Created event: %s (%s, %s)", summary, created.id, transparency);
   return created.id!;
 }
 
@@ -153,7 +158,9 @@ function updateWorkEvent(
   start: Date,
   end: Date,
   tz: string,
-  colorId?: string
+  colorId?: string,
+  transparency?: string,
+  summary?: string
 ): void {
   const patch: GoogleAppsScript.Calendar.Schema.Event = {
     start: { dateTime: start.toISOString(), timeZone: tz },
@@ -162,8 +169,14 @@ function updateWorkEvent(
   if (colorId) {
     patch.colorId = colorId;
   }
+  if (transparency) {
+    patch.transparency = transparency;
+  }
+  if (summary) {
+    patch.summary = summary;
+  }
   Calendar.Events!.patch(patch, calendarId, eventId);
-  Logger.log("Updated event: %s", eventId);
+  Logger.log("Updated event: %s (transparency=%s)", eventId, transparency || "unchanged");
 }
 
 function recolorWorkEvent(

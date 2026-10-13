@@ -13,6 +13,7 @@ interface ClockwiseConfig {
   syncLookaheadDays: number;
   syncOutsideWorkHours: boolean;
   busyBlockTitle: string;
+  freeBlockTitle: string;
   busyBlockColor: string;
   lunchColor: string;
 }
@@ -25,6 +26,7 @@ const DEFAULTS: Partial<Record<keyof ClockwiseConfig, string>> = {
   lunchWindowStart: "11:30",
   lunchWindowEnd: "13:30",
   busyBlockTitle: "Busy (Synced)",
+  freeBlockTitle: "Free (Synced)",
 };
 
 const DEFAULTS_NUMERIC: Partial<Record<keyof ClockwiseConfig, number>> = {
@@ -133,6 +135,7 @@ function getConfig(): ClockwiseConfig {
     syncOutsideWorkHours:
       getProp("SYNC_OUTSIDE_WORK_HOURS", "false").toLowerCase() === "true",
     busyBlockTitle: getProp("BUSY_BLOCK_TITLE", DEFAULTS.busyBlockTitle),
+    freeBlockTitle: getProp("FREE_BLOCK_TITLE", DEFAULTS.freeBlockTitle),
     busyBlockColor: getProp("BUSY_BLOCK_COLOR", ""),
     lunchColor: getProp("LUNCH_COLOR", ""),
   };
