@@ -75,26 +75,34 @@ function syncPersonalToWork(): void {
         skippedPast++;
         continue;
       }
+      const isFree = personal.transparency === "transparent";
       createWorkEvent(
         config.workCalendarId,
-        config.busyBlockTitle,
+        isFree ? config.freeBlockTitle : config.busyBlockTitle,
         personal.start,
         personal.end,
         { [EP_SOURCE_ID]: personalId },
         tz,
-        config.busyBlockColor || undefined
+        config.busyBlockColor || undefined,
+        personal.transparency || "opaque"
       );
       created++;
     } else if (
       existing.start.getTime() !== personal.start.getTime() ||
-      existing.end.getTime() !== personal.end.getTime()
+      existing.end.getTime() !== personal.end.getTime() ||
+      (existing.transparency || "opaque") !== (personal.transparency || "opaque")
     ) {
+      const isFree = personal.transparency === "transparent";
+      const expectedTitle = isFree ? config.freeBlockTitle : config.busyBlockTitle;
       updateWorkEvent(
         config.workCalendarId,
         existing.id,
         personal.start,
         personal.end,
-        tz
+        tz,
+        undefined,
+        personal.transparency || "opaque",
+        expectedTitle
       );
       updated++;
     }

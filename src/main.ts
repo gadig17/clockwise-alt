@@ -24,10 +24,18 @@ function installTriggers(): void {
     .everyMinutes(15)
     .create();
 
+  // Bulk-schedule lunch for the next 14 days every Monday at 6 AM
+  ScriptApp.newTrigger("runLunchBulk")
+    .timeBased()
+    .onWeekDay(ScriptApp.WeekDay.MONDAY)
+    .atHour(6)
+    .create();
+
   Logger.log(
     "Triggers installed:\n" +
       "  • syncPersonalToWork — every 5 min\n" +
-      "  • scheduleLunch — daily at 7 AM + every 15 min"
+      "  • scheduleLunch — daily at 7 AM + every 15 min\n" +
+      "  • runLunchBulk — weekly on Monday at 6 AM"
   );
 }
 
